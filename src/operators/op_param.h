@@ -471,15 +471,6 @@ class ElementwiseMulParam : OpParam {
   GType *input_y_;
   GType *out_;
   int axis_;
-#ifdef PADDLE_MOBILE_FPGA
-
- private:
-  fpga::EWMulArgs fpga_EW_mul_args;
-
- public:
-  const fpga::EWMulArgs &FpgaArgs() const { return fpga_EW_mul_args; }
-  void SetFpgaArgs(const fpga::EWMulArgs &args) { fpga_EW_mul_args = args; }
-#endif
 };
 #endif
 
@@ -555,11 +546,11 @@ class MulParam : OpParam {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -628,15 +619,6 @@ class SumParam : public OpParam {
   Variable *out_var_;
   vector<GType *> inputs_;
   GType *out_;
-#ifdef PADDLE_MOBILE_FPGA
-
- private:
-  fpga::SumArgs fpga_sum_args;
-
- public:
-  const fpga::SumArgs &FpgaArgs() const { return fpga_sum_args; }
-  void SetFpgaArgs(const fpga::SumArgs &args) { fpga_sum_args = args; }
-#endif
 };
 #endif
 
@@ -1017,6 +999,28 @@ class MultiClassNMSParam : public OpParam {
 };
 #endif
 
+#ifdef POLYGONBOXTRANSFORM_OP
+template <typename Dtype>
+class PolygonBoxTransformParam : public OpParam {
+  typedef typename DtypeTensorTrait<Dtype>::gtype GType;
+  typedef typename DtypeTensorTrait<Dtype>::rtype RType;
+
+ public:
+  PolygonBoxTransformParam(const VariableNameMap &inputs,
+                           const VariableNameMap &outputs,
+                           const AttributeMap &attrs, const Scope &scope) {
+    input_ = InputFrom<GType>(inputs, scope);
+    output_ = OutputFrom<GType>(outputs, scope);
+  }
+  const RType *Input() const { return input_; }
+  RType *Output() const { return output_; }
+
+ private:
+  RType *input_;
+  RType *output_;
+};
+#endif
+
 template <typename Dtype>
 class FeedParam : public OpParam {
   typedef typename DtypeTensorTrait<Dtype>::gtype GType;
@@ -1058,6 +1062,42 @@ class FetchParam : public OpParam {
   RType *input_x_;
   RType *out_;
 };
+
+#ifdef FILL_CONSTANT_OP
+template <typename Dtype>
+class FillConstantParam : public OpParam {
+  typedef typename DtypeTensorTrait<Dtype>::gtype GType;
+  typedef typename DtypeTensorTrait<Dtype>::rtype RType;
+
+ public:
+  FillConstantParam(const VariableNameMap &inputs,
+                    const VariableNameMap &outputs, const AttributeMap &attrs,
+                    const Scope &scope) {
+    out_var_ = OutVarFrom(outputs, scope);
+    out_ = OutFrom<GType>(outputs, scope);
+    dtype_ = GetAttr<int>("dtype", attrs);
+    shape_ = GetAttr<vector<int>>("shape", attrs);
+    value_ = GetAttr<float>("value", attrs);
+  }
+
+  Variable *OutVar() const { return out_var_; }
+
+  RType *Out() const { return out_; }
+
+  const int &DataDtype() const { return dtype_; }
+
+  const vector<int> &Shape() const { return shape_; }
+
+  const float &Value() const { return value_; }
+
+ private:
+  Variable *out_var_;
+  RType *out_;
+  int dtype_;
+  vector<int> shape_;
+  float value_;
+};
+#endif
 
 #ifdef TRANSPOSE_OP
 template <typename Dtype>
@@ -1419,11 +1459,11 @@ class FusionFcParam : public OpParam {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 
@@ -1459,11 +1499,11 @@ class FusionConvAddParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 
@@ -1514,11 +1554,11 @@ class FusionConvAddPReluParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -1572,11 +1612,11 @@ class FusionConvAddAddPReluParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -1647,11 +1687,11 @@ class FusionConvAddBNReluParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -1733,11 +1773,11 @@ class FusionConvBNAddReluParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -1800,11 +1840,11 @@ class FusionConvBNParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -1875,11 +1915,11 @@ class FusionConvAddBNParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -2001,11 +2041,11 @@ class FusionConvBNReluParam : public ConvParam<Dtype> {
 #ifdef PADDLE_MOBILE_FPGA
 
  private:
-  fpga::WrapperConvArgs fpga_conv_args;
+  fpga::SplitConvArgs fpga_conv_args;
 
  public:
-  const fpga::WrapperConvArgs &FpgaArgs() const { return fpga_conv_args; }
-  void SetFpgaArgs(const fpga::WrapperConvArgs &args) { fpga_conv_args = args; }
+  const fpga::SplitConvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::SplitConvArgs &args) { fpga_conv_args = args; }
 #endif
 };
 #endif
@@ -2290,6 +2330,7 @@ class ShapeParam : public OpParam {
 };
 #endif
 
+#ifdef QUANT_OP
 template <typename Dtype>
 class QuantizeParam : public OpParam {
   typedef typename DtypeTensorTrait<Dtype>::gtype GType;
@@ -2300,14 +2341,12 @@ class QuantizeParam : public OpParam {
                 const AttributeMap &attrs, const Scope &scope) {
     input_ = InputXFrom<GType>(inputs, scope);
     out_ = OutFrom<GType>(outputs, scope);
-    if (HasAttr("is_static", attrs)) {
-      is_static_ = GetAttr<bool>("is_static", attrs);
-    }
     // online
     // scale = max(abs(x))
     online_scale_ = GetVarValue<GType>("OutScale", outputs, scope);
     // offline
     if (HasAttr("static_scale", attrs)) {
+      is_static_ = true;
       static_scale_ = GetAttr<float>("static_scale", attrs);
     }
     // x = round(scale * x)
@@ -2329,9 +2368,11 @@ class QuantizeParam : public OpParam {
   float static_scale_ = 1.0f;
   // round method type
   // nearest_zero and nearest_even is valid currently
-  RoundType round_type_ = ROUND_NEAREST_TO_EVEN;
+  RoundType round_type_ = ROUND_NEAREST_AWAY_ZERO;
 };
+#endif
 
+#ifdef DEQUANT_OP
 template <typename Dtype>
 class DequantizeParam : public OpParam {
   typedef typename DtypeTensorTrait<Dtype>::gtype GType;
@@ -2359,6 +2400,7 @@ class DequantizeParam : public OpParam {
   RType *activation_scale_;
   float weight_scale_;
 };
+#endif
 
 }  // namespace operators
 }  // namespace paddle_mobile
