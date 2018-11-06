@@ -19,7 +19,11 @@
 - 支持ZU5、ZU9等FPGA开发板
 - 支持树莓派等arm-linux开发板
 
-## Demo目录
+## Demo
+- [ANDROID](https://github.com/xiebaiyuan/paddle-mobile-demo)
+
+### 原Domo目录
+
 [https://github.com/PaddlePaddle/paddle-mobile/tree/develop/demo](https://github.com/PaddlePaddle/paddle-mobile/tree/develop/demo)
 
 ## 文档
@@ -35,6 +39,7 @@
 * [iOS](https://github.com/PaddlePaddle/paddle-mobile/blob/develop/doc/development_ios.md)
 * [Android](https://github.com/PaddlePaddle/paddle-mobile/blob/develop/doc/development_android.md)
 * [FPGA](https://github.com/PaddlePaddle/paddle-mobile/blob/develop/doc/development_fpga.md)
+* [ARM_LINUX](https://github.com/PaddlePaddle/paddle-mobile/blob/develop/doc/development_arm_linux.md)
 
 ### 贡献文档
 - [贡献文档链接](https://github.com/PaddlePaddle/paddle-mobile/blob/develop/CONTRIBUTING.md)
