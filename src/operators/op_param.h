@@ -1338,23 +1338,23 @@ class Reshape2Param : public OpParam {
     }
   }
 
-  const RType *InputX() const { return input_x_; }
+  const GType *InputX() const { return input_x_; }
 
-  const RType *InputShape() const { return input_shape_; }
+  const GType *InputShape() const { return input_shape_; }
 
-  RType *Out() const { return out_; }
+  GType *Out() const { return out_; }
 
-  RType *OutputXShape() const { return output_xshape_; }
+  GType *OutputXShape() const { return output_xshape_; }
 
   const vector<int> &Shape() const { return shape_; }
 
   const bool &Inplace() const { return inplace_; }
 
  private:
-  RType *input_x_;
-  RType *input_shape_;
-  RType *out_;
-  RType *output_xshape_;
+  GType *input_x_;
+  GType *input_shape_;
+  GType *out_;
+  GType *output_xshape_;
   vector<int> shape_;
   bool inplace_;
 };
@@ -1532,6 +1532,27 @@ class ReluParam<GPU_CL> : public ReluParamBase<GPU_CL> {
 };
 #endif
 
+#endif
+
+#ifdef TANH_OP
+template <typename Dtype>
+class TanhParam : public OpParam {
+  typedef typename DtypeTensorTrait<Dtype>::gtype GType;
+  typedef typename DtypeTensorTrait<Dtype>::rtype RType;
+
+ public:
+  TanhParam(const VariableNameMap &inputs, const VariableNameMap &outputs,
+            const AttributeMap &attrs, const Scope &scope) {
+    input_x_ = InputXFrom<GType>(inputs, scope);
+    out_ = OutFrom<GType>(outputs, scope);
+  }
+  const RType *InputX() const { return input_x_; }
+  RType *Out() const { return out_; }
+
+ private:
+  RType *input_x_;
+  RType *out_;
+};
 #endif
 
 #ifdef PRELU_OP
@@ -2229,7 +2250,22 @@ class ConvTransposeParam : public OpParam {
   vector<int> paddings_;
   vector<int> dilations_;
   int groups;
+
+#ifdef PADDLE_MOBILE_FPGA
+
+ private:
+  fpga::DeconvArgs fpga_conv_args;
+
+ public:
+  const fpga::DeconvArgs &FpgaArgs() const { return fpga_conv_args; }
+  void SetFpgaArgs(const fpga::DeconvArgs &args) { fpga_conv_args = args; }
+#endif
 };
+#endif
+
+#ifdef FUSION_DECONVRELU_OP
+template <typename Dtype>
+using FusionDeconvReluParam = ConvTransposeParam<Dtype>;
 #endif
 
 #ifdef GRU_OP

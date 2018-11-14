@@ -71,6 +71,8 @@ const char *G_OP_TYPE_SUM = "sum";
 
 const char *G_OP_TYPE_QUANTIZE = "quantize";
 const char *G_OP_TYPE_DEQUANTIZE = "dequantize";
+extern const char *G_OP_TYPE_TANH = "tanh";
+extern const char *G_OP_TYPE_FUSION_DECONV_RELU = "fusion_deconv_relu";
 
 std::unordered_map<
     std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>
@@ -82,6 +84,7 @@ std::unordered_map<
         {G_OP_TYPE_FUSION_CONV_ADD, {{"Input"}, {"Out"}}},
         {G_OP_TYPE_RELU, {{"X"}, {"Out"}}},
         {G_OP_TYPE_SOFTMAX, {{"X"}, {"Out"}}},
+        {G_OP_TYPE_SIGMOID, {{"X"}, {"Out"}}},
         {G_OP_TYPE_MUL, {{"X"}, {"Out"}}},
         {G_OP_TYPE_ELEMENTWISE_ADD, {{"X", "Y"}, {"Out"}}},
         {G_OP_TYPE_POOL2D, {{"X"}, {"Out"}}},
@@ -128,5 +131,7 @@ std::unordered_map<
         {G_OP_TYPE_SUM, {{"X"}, {"Out"}}},
         {G_OP_TYPE_ELEMENTWISE_MUL, {{"X", "Y"}, {"Out"}}},
         {G_OP_TYPE_QUANTIZE, {{"X"}, {"Out", "OutScale"}}},
-        {G_OP_TYPE_DEQUANTIZE, {{"X", "Scale"}, {"Out"}}}};
+        {G_OP_TYPE_DEQUANTIZE, {{"X", "Scale"}, {"Out"}}},
+        {G_OP_TYPE_TANH, {{"X"}, {"Out"}}},
+        {G_OP_TYPE_FUSION_DECONV_RELU, {{"Input"}, {"Out"}}}};
 }  // namespace paddle_mobile
